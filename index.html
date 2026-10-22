@@ -48,7 +48,6 @@
             min-height: 80vh;
         }
 
-        /* 首頁樣式 */
         #home-view { display: block; }
         
         .welcome-section {
@@ -62,10 +61,7 @@
 
         .welcome-section h2 { color: var(--primary-color); margin-top: 0; }
 
-        /* 全單元挑戰超大按鈕 */
-        .global-challenge-box {
-            margin-bottom: 2.5rem;
-        }
+        .global-challenge-box { margin-bottom: 2.5rem; }
         .global-btn {
             width: 100%;
             background: linear-gradient(135deg, #e67e22, #f39c12);
@@ -147,7 +143,6 @@
             border-color: var(--secondary-color);
         }
 
-        /* 測驗模式樣式 */
         #quiz-view { display: none; }
 
         .quiz-container {
@@ -195,7 +190,7 @@
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             line-height: 1.5;
-            white-space: pre-line; /* 保持題目內容中的正常換行 */
+            white-space: pre-line;
         }
 
         .options-list { list-style: none; padding: 0; margin: 1.5rem 0; }
@@ -209,18 +204,17 @@
             transition: all 0.2s; 
             background: #fff;
             font-size: 1rem;
-            white-space: pre-line; /* 保持選項內容中的正常換行 */
+            white-space: pre-line;
         }
 
         .option-item:hover { border-color: var(--accent-color); background: #f0f7ff; }
-
         .option-item.correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
         .option-item.wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
 
         .feedback { 
             margin-top: 1.5rem; padding: 1.2rem; border-radius: 10px; display: none; 
             border-left: 5px solid var(--accent-color); 
-            white-space: pre-line; /* 保持解析中的正常換行 */
+            white-space: pre-line;
         }
         .feedback.show { display: block; }
 
@@ -240,7 +234,6 @@
         }
         .next-btn:hover { background: #14967c; }
 
-        /* 結算報告畫面樣式 */
         #result-view { display: none; }
         
         .result-container {
@@ -288,19 +281,17 @@
 
     <header>
         <h1><i class="fa-solid fa-notes-medical"></i> HMSC 健康管理與社會關懷自學網</h1>
-        <p>靜態題庫模式：不需公開 Google 試算表即可發布運作</p>
+        <p>穩健 JSON 題庫架構</p>
     </header>
 
     <div class="container">
         
-        <!-- 視圖一：首頁選單 -->
         <div id="home-view">
             <div class="welcome-section">
                 <h2>全科溫習隨機刷題庫</h2>
                 <p>請選擇全單元挑戰或指定專題進行高效溫習</p>
             </div>
 
-            <!-- 全單元挑戰按鈕 -->
             <div class="global-challenge-box">
                 <button class="global-btn" onclick="initGlobalQuiz30()">
                     <i class="fa-solid fa-bolt-lightning"></i> 進入「全單元精選 30 題」模擬 DSE 會考挑戰！
@@ -309,11 +300,10 @@
 
             <div class="section-title">按個別課題溫習</div>
             <div class="unit-grid" id="unitGrid">
-                <p class="empty-tips"><i class="fa-solid fa-spinner fa-spin"></i> 正在載入本地題庫，請稍候...</p>
+                <p class="empty-tips"><i class="fa-solid fa-spinner fa-spin"></i> 正在載入題庫，請稍候...</p>
             </div>
         </div>
 
-        <!-- 視圖二：單題測驗作答區 -->
         <div id="quiz-view">
             <div class="quiz-container">
                 <div class="quiz-header">
@@ -333,7 +323,6 @@
             </div>
         </div>
 
-        <!-- 視圖三：答完後的評級與結算畫面 -->
         <div id="result-view">
             <div class="result-container">
                 <div class="result-icon"><i class="fa-solid fa-trophy"></i></div>
@@ -355,116 +344,56 @@
     </div>
 
     <script>
-        // 📁 讀取同目錄下的相對路徑檔案
-        const LOCAL_CSV_FILE = "./data.csv";
+        // 📁 切換為更穩定的 JSON 靜態檔案
+        const LOCAL_JSON_FILE = "./data.json";
 
         const quizData = [];
         let currentQuestionsList = []; 
         let currentQIndex = 0;        
         let correctCount = 0; 
 
-        // 頁面載入時自動讀取同目錄下的 CSV 數據
         window.onload = function() {
-            fetchLocalCSV();
+            fetchLocalJSON();
         };
 
-        // 🚀 升級版 CSV 解析器：可完美處理解析與題目中的多行換行（Enter）與雙引號
-        function parseCSV(text) {
-            let result = [];
-            let row = [];
-            let entry = '';
-            let insideQuote = false;
-
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                let nextChar = text[i + 1];
-
-                if (char === '"') {
-                    if (insideQuote && nextChar === '"') {
-                        entry += '"';
-                        i++; // 跳過轉義的雙引號
-                    } else {
-                        insideQuote = !insideQuote;
-                    }
-                } else if (char === ',' && !insideQuote) {
-                    row.push(entry.trim());
-                    entry = '';
-                } else if ((char === '\r' || char === '\n') && !insideQuote) {
-                    if (char === '\r' && nextChar === '\n') {
-                        i++; // 處理 Windows 換行符 \r\n
-                    }
-                    row.push(entry.trim());
-                    if (row.some(field => field.length > 0)) {
-                        result.push(row);
-                    }
-                    row = [];
-                    entry = '';
-                } else {
-                    entry += char;
-                }
-            }
-
-            if (entry || row.length > 0) {
-                row.push(entry.trim());
-                if (row.some(field => field.length > 0)) {
-                    result.push(row);
-                }
-            }
-
-            return result;
-        }
-
-        function fetchLocalCSV() {
-            fetch(LOCAL_CSV_FILE)
+        function fetchLocalJSON() {
+            fetch(LOCAL_JSON_FILE)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('找不到 data.csv 檔案');
+                        throw new Error('找不到 data.json 檔案');
                     }
-                    return response.text();
+                    return response.json();
                 })
-                .then(csvText => {
-                    const rows = parseCSV(csvText);
-                    if (rows.length < 2) {
-                        document.getElementById('unitGrid').innerHTML = '<p class="empty-tips">data.csv 中沒有題目數據，請確認內容。</p>';
-                        return;
-                    }
-                    
-                    const headers = rows[0];
-                    const data = [];
-                    for (let i = 1; i < rows.length; i++) {
-                        let record = {};
-                        headers.forEach((header, index) => {
-                            record[header] = rows[i][index] || '';
-                        });
-                        data.push(record);
-                    }
-                    
+                .then(data => {
                     processData(data);
                     renderHomePage();
                 })
                 .catch(error => {
-                    console.error('讀取本地題庫失敗:', error);
-                    document.getElementById('unitGrid').innerHTML = '<p class="empty-tips" style="color: #e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> 題庫載入失敗！請確認你已將 CSV 檔案命名為 <b>data.csv</b> 並與 index.html 放置於同一資料夾。</p>';
+                    console.error('讀取題庫失敗:', error);
+                    document.getElementById('unitGrid').innerHTML = '<p class="empty-tips" style="color: #e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> 題庫載入失敗！請確認你已將 data.json 上傳至 GitHub 儲存庫。</p>';
                 });
         }
 
-        // 數據重組邏輯
         function processData(myExcelData) {
             if (!myExcelData || myExcelData.length === 0) return;
             quizData.length = 0;
 
             myExcelData.forEach(row => {
-                if (!row.mainUnit || !row.subUnit) return; // 過濾空資料列
+                // 自動修剪空格，避免因為微小空白造成不必要的獨立章節
+                const mainUnitName = String(row.mainUnit || '').trim();
+                const subUnitName = String(row.subUnit || '').trim();
+
+                if (!mainUnitName || !subUnitName) return;
 
                 const currentAnswer = parseInt(row.answer, 10);
-                let unit = quizData.find(u => u.mainUnit === row.mainUnit);
+                let unit = quizData.find(u => u.mainUnit === mainUnitName);
                 if (!unit) {
-                    unit = { mainUnit: row.mainUnit, subUnits: [] };
+                    unit = { mainUnit: mainUnitName, subUnits: [] };
                     quizData.push(unit);
                 }
-                let sub = unit.subUnits.find(s => s.title === row.subUnit);
+                let sub = unit.subUnits.find(s => s.title === subUnitName);
                 if (!sub) {
-                    sub = { title: row.subUnit, questions: [] };
+                    sub = { title: subUnitName, questions: [] };
                     unit.subUnits.push(sub);
                 }
                 sub.questions.push({
@@ -476,7 +405,6 @@
             });
         }
 
-        // 視圖切換機制
         function toggleView(view) {
             const homeView = document.getElementById('home-view');
             const quizView = document.getElementById('quiz-view');
@@ -495,11 +423,10 @@
             }
         }
 
-        // 生成首頁主單元卡片
         function renderHomePage() {
             const grid = document.getElementById('unitGrid');
             if (quizData.length === 0) {
-                grid.innerHTML = '<p class="empty-tips">目前沒有題目數據，請檢查 data.csv 檔案。</p>';
+                grid.innerHTML = '<p class="empty-tips">目前沒有題目數據，請檢查 data.json 檔案。</p>';
                 return;
             }
             grid.innerHTML = '';
@@ -524,7 +451,6 @@
             });
         }
 
-        // 隨機洗牌演算法
         function shuffle(array) {
             let currentIndex = array.length, randomIndex;
             while (currentIndex != 0) {
@@ -535,7 +461,6 @@
             return array;
         }
 
-        // 從各主單元中「平均且隨機」抽取共 30 題的演算法
         function initGlobalQuiz30() {
             if (quizData.length === 0) return;
 
@@ -582,7 +507,6 @@
             renderSingleQuestion();
         }
 
-        // 初始化指定課題測驗
         function initQuizRoom(uIdx, sIdx) {
             const originalQuestions = quizData[uIdx].subUnits[sIdx].questions;
             
@@ -595,7 +519,6 @@
             renderSingleQuestion();
         }
 
-        // 渲染單道問題
         function renderSingleQuestion() {
             const qData = currentQuestionsList[currentQIndex];
             
@@ -677,7 +600,6 @@
             }
         }
 
-        // 計算分數與五星評級結算系統
         function showResultsSummary() {
             const total = currentQuestionsList.length;
             const percentage = Math.round((correctCount / total) * 100);

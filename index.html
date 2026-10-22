@@ -195,6 +195,7 @@
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             line-height: 1.5;
+            white-space: pre-line; /* 保持題目內容中的正常換行 */
         }
 
         .options-list { list-style: none; padding: 0; margin: 1.5rem 0; }
@@ -208,6 +209,7 @@
             transition: all 0.2s; 
             background: #fff;
             font-size: 1rem;
+            white-space: pre-line; /* 保持選項內容中的正常換行 */
         }
 
         .option-item:hover { border-color: var(--accent-color); background: #f0f7ff; }
@@ -218,6 +220,7 @@
         .feedback { 
             margin-top: 1.5rem; padding: 1.2rem; border-radius: 10px; display: none; 
             border-left: 5px solid var(--accent-color); 
+            white-space: pre-line; /* 保持解析中的正常換行 */
         }
         .feedback.show { display: block; }
 
@@ -352,7 +355,7 @@
     </div>
 
     <script>
-        // 📁 改為讀取同目錄下的相對路徑檔案
+        // 📁 讀取同目錄下的相對路徑檔案
         const LOCAL_CSV_FILE = "./data.csv";
 
         const quizData = [];
@@ -365,30 +368,49 @@
             fetchLocalCSV();
         };
 
-        // CSV 解析函式 (支援雙引號與逗號轉義)
+        // 🚀 升級版 CSV 解析器：可完美處理解析與題目中的多行換行（Enter）與雙引號
         function parseCSV(text) {
-            let lines = text.split(/\r?\n/);
             let result = [];
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                let row = [];
-                let insideQuote = false;
-                let entry = '';
-                for (let j = 0; j < line.length; j++) {
-                    let char = line[j];
-                    if (char === '"') {
-                        insideQuote = !insideQuote;
-                    } else if (char === ',' && !insideQuote) {
-                        row.push(entry.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-                        entry = '';
+            let row = [];
+            let entry = '';
+            let insideQuote = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let nextChar = text[i + 1];
+
+                if (char === '"') {
+                    if (insideQuote && nextChar === '"') {
+                        entry += '"';
+                        i++; // 跳過轉義的雙引號
                     } else {
-                        entry += char;
+                        insideQuote = !insideQuote;
                     }
+                } else if (char === ',' && !insideQuote) {
+                    row.push(entry.trim());
+                    entry = '';
+                } else if ((char === '\r' || char === '\n') && !insideQuote) {
+                    if (char === '\r' && nextChar === '\n') {
+                        i++; // 處理 Windows 換行符 \r\n
+                    }
+                    row.push(entry.trim());
+                    if (row.some(field => field.length > 0)) {
+                        result.push(row);
+                    }
+                    row = [];
+                    entry = '';
+                } else {
+                    entry += char;
                 }
-                row.push(entry.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-                result.push(row);
             }
+
+            if (entry || row.length > 0) {
+                row.push(entry.trim());
+                if (row.some(field => field.length > 0)) {
+                    result.push(row);
+                }
+            }
+
             return result;
         }
 
@@ -422,7 +444,7 @@
                 })
                 .catch(error => {
                     console.error('讀取本地題庫失敗:', error);
-                    document.getElementById('unitGrid').innerHTML = '<p class="empty-tips" style="color: #e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> 題庫載入失敗！請確認你已將從 Google 試算表下載的 CSV 檔案重命名為 <b>data.csv</b> 並放在與 index.html 相同的資料夾中。</p>';
+                    document.getElementById('unitGrid').innerHTML = '<p class="empty-tips" style="color: #e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> 題庫載入失敗！請確認你已將 CSV 檔案命名為 <b>data.csv</b> 並與 index.html 放置於同一資料夾。</p>';
                 });
         }
 
@@ -432,6 +454,8 @@
             quizData.length = 0;
 
             myExcelData.forEach(row => {
+                if (!row.mainUnit || !row.subUnit) return; // 過濾空資料列
+
                 const currentAnswer = parseInt(row.answer, 10);
                 let unit = quizData.find(u => u.mainUnit === row.mainUnit);
                 if (!unit) {

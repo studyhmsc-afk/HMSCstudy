@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMSC 健康管理與社會關懷科 溫習平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { 
+            --primary-color: #2c3e50; 
+            --secondary-color: #18bc9c; 
+            --bg-color: #f0f3f6; 
+            --card-bg: #ffffff; 
+            --text-main: #2c3e50;
+            --accent-color: #3498db;
+            --warning-color: #f39c12;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Helvetica Neue', Arial, 'PingFang HK', 'Microsoft JhengHei', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+        }
+
+        header { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 1.2rem 2rem; 
+            text-align: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 1px; }
+        header p { margin: 5px 0 0; opacity: 0.8; font-size: 0.9rem; }
+
+        .container { 
+            max-width: 1000px; 
+            margin: 2rem auto; 
+            padding: 0 1.5rem; 
+            min-height: 80vh;
+        }
+
+        /* 首頁樣式 */
+        #home-view { display: block; }
+        
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .welcome-section h2 { color: var(--primary-color); margin-top: 0; }
+
+        /* 全單元挑戰超大按鈕 */
+        .global-challenge-box {
+            margin-bottom: 2.5rem;
+        }
+        .global-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            border: none;
+            padding: 1.5rem;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(230,126,34,0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .global-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(230,126,34,0.4);
+            background: linear-gradient(135deg, #d35400, #e67e22);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 10px;
+        }
+
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .unit-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border-top: 5px solid var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .unit-card:hover { transform: translateY(-5px); }
+
+        .unit-card-header {
+            padding: 1.2rem;
+            background: #fcfcfc;
+            border-bottom: 1px solid #eee;
+        }
+
+        .unit-card-header h3 { margin: 0; font-size: 1.1rem; color: var(--primary-color); line-height: 1.4; }
+
+        .sub-unit-links { padding: 1rem; list-style: none; margin: 0; flex: 1; }
+
+        .sub-unit-link-item {
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            border: 1px solid #edf2f7;
+            font-size: 0.9rem;
+        }
+
+        .sub-unit-link-item:hover {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        /* 測驗模式樣式 */
+        #quiz-view { display: none; }
+
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f3f6;
+        }
+
+        .back-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover { background: #c0392b; }
+
+        .progress-text {
+            font-weight: bold;
+            color: var(--accent-color);
+            background: #e1f5fe;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .options-list { list-style: none; padding: 0; margin: 1.5rem 0; }
+
+        .option-item { 
+            padding: 1.1rem 1.3rem; 
+            margin: 0.8rem 0; 
+            border: 2px solid #edf2f7; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            background: #fff;
+            font-size: 1rem;
+        }
+
+        .option-item:hover { border-color: var(--accent-color); background: #f0f7ff; }
+
+        .option-item.correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .option-item.wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+
+        .feedback { 
+            margin-top: 1.5rem; padding: 1.2rem; border-radius: 10px; display: none; 
+            border-left: 5px solid var(--accent-color); 
+        }
+        .feedback.show { display: block; }
+
+        .next-btn {
+            display: none;
+            width: 100%;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background 0.2s;
+        }
+        .next-btn:hover { background: #14967c; }
+
+        /* 結算報告畫面樣式 */
+        #result-view { display: none; }
+        
+        .result-container {
+            background: white;
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .result-icon { font-size: 4.5rem; color: #f39c12; margin-bottom: 1rem; }
+        .score-big { font-size: 3.5rem; font-weight: bold; color: var(--primary-color); margin: 1rem 0; }
+        .score-details { font-size: 1.2rem; color: #7f8c8d; margin-bottom: 1.5rem; }
+        
+        .evaluation-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 6px solid var(--secondary-color);
+            text-align: left;
+        }
+        .evaluation-box h4 { margin: 0 0 5px 0; color: var(--primary-color); font-size: 1.1rem; }
+        .evaluation-box p { margin: 0; color: #555; }
+
+        .home-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .home-btn:hover { background: #1a252f; }
+
+        .empty-tips { color: #7f8c8d; text-align: center; padding: 3rem 0; font-size: 1.1rem; grid-column: 1/-1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-notes-medical"></i> HMSC 健康管理與社會關懷自學網</h1>
+        <p>靜態題庫模式：不需公開 Google 試算表即可發布運作</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- 視圖一：首頁選單 -->
+        <div id="home-view">
+            <div class="welcome-section">
+                <h2>全科溫習隨機刷題庫</h2>
+                <p>請選擇全單元挑戰或指定專題進行高效溫習</p>
+            </div>
+
+            <!-- 全單元挑戰按鈕 -->
+            <div class="global-challenge-box">
+                <button class="global-btn" onclick="initGlobalQuiz30()">
+                    <i class="fa-solid fa-bolt-lightning"></i> 進入「全單元精選 30 題」模擬 DSE 會考挑戰！
+                </button>
+            </div>
+
+            <div class="section-title">按個別課題溫習</div>
+            <div class="unit-grid" id="unitGrid">
+                <p class="empty-tips"><i class="fa-solid fa-spinner fa-spin"></i> 正在載入本地題庫，請稍候...</p>
+            </div>
+        </div>
+
+        <!-- 視圖二：單題測驗作答區 -->
+        <div id="quiz-view">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <button class="back-btn" onclick="confirmExit()">
+                        <i class="fa-solid fa-house"></i> 返回首頁
+                    </button>
+                    <div id="subTopicTitle" style="font-weight: bold; color: var(--primary-color); font-size: 1.05rem;"></div>
+                    <div class="progress-text" id="progressText">第 0 / 0 題</div>
+                </div>
+                
+                <main>
+                    <div class="question-text" id="qText">題目載入中...</div>
+                    <ul class="options-list" id="optionsContainer"></ul>
+                    <div class="feedback" id="feedbackContainer"></div>
+                    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">下一題 <i class="fa-solid fa-arrow-right"></i></button>
+                </main>
+            </div>
+        </div>
+
+        <!-- 視圖三：答完後的評級與結算畫面 -->
+        <div id="result-view">
+            <div class="result-container">
+                <div class="result-icon"><i class="fa-solid fa-trophy"></i></div>
+                <h2>溫習挑戰完成！</h2>
+                <div class="score-big" id="resultPercentage">0%</div>
+                <div class="score-details" id="resultScoreText">答對 0 題 / 共 0 題</div>
+                
+                <div class="evaluation-box">
+                    <h4 id="evalGrade">評級評分中...</h4>
+                    <p id="evalComment">評語產生中...</p>
+                </div>
+
+                <button class="home-btn" onclick="toggleView('home')">
+                    <i class="fa-solid fa-rotate-left"></i> 返回主頁
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 📁 改為讀取同目錄下的相對路徑檔案
+        const LOCAL_CSV_FILE = "./data.csv";
+
+        const quizData = [];
+        let currentQuestionsList = []; 
+        let currentQIndex = 0;        
+        let correctCount = 0; 
+
+        // 頁面載入時自動讀取同目錄下的 CSV 數據
+        window.onload = function() {
+            fetchLocalCSV();
+        };
+
+        // CSV 解析函式 (支援雙引號與逗號轉義)
+        function parseCSV(text) {
+            let lines = text.split(/\r?\n/);
+            let result = [];
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
+                let row = [];
+                let insideQuote = false;
+                let entry = '';
+                for (let j = 0; j < line.length; j++) {
+                    let char = line[j];
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        row.push(entry.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+                        entry = '';
+                    } else {
+                        entry += char;
+                    }
+                }
+                row.push(entry.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+                result.push(row);
+            }
+            return result;
+        }
+
+        function fetchLocalCSV() {
+            fetch(LOCAL_CSV_FILE)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('找不到 data.csv 檔案');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    const rows = parseCSV(csvText);
+                    if (rows.length < 2) {
+                        document.getElementById('unitGrid').innerHTML = '<p class="empty-tips">data.csv 中沒有題目數據，請確認內容。</p>';
+                        return;
+                    }
+                    
+                    const headers = rows[0];
+                    const data = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        let record = {};
+                        headers.forEach((header, index) => {
+                            record[header] = rows[i][index] || '';
+                        });
+                        data.push(record);
+                    }
+                    
+                    processData(data);
+                    renderHomePage();
+                })
+                .catch(error => {
+                    console.error('讀取本地題庫失敗:', error);
+                    document.getElementById('unitGrid').innerHTML = '<p class="empty-tips" style="color: #e74c3c;"><i class="fa-solid fa-circle-exclamation"></i> 題庫載入失敗！請確認你已將從 Google 試算表下載的 CSV 檔案重命名為 <b>data.csv</b> 並放在與 index.html 相同的資料夾中。</p>';
+                });
+        }
+
+        // 數據重組邏輯
+        function processData(myExcelData) {
+            if (!myExcelData || myExcelData.length === 0) return;
+            quizData.length = 0;
+
+            myExcelData.forEach(row => {
+                const currentAnswer = parseInt(row.answer, 10);
+                let unit = quizData.find(u => u.mainUnit === row.mainUnit);
+                if (!unit) {
+                    unit = { mainUnit: row.mainUnit, subUnits: [] };
+                    quizData.push(unit);
+                }
+                let sub = unit.subUnits.find(s => s.title === row.subUnit);
+                if (!sub) {
+                    sub = { title: row.subUnit, questions: [] };
+                    unit.subUnits.push(sub);
+                }
+                sub.questions.push({
+                    q: row.q,
+                    options: [`A. ${row.optA}`, `B. ${row.optB}`, `C. ${row.optC}`, `D. ${row.optD}`],
+                    answer: isNaN(currentAnswer) ? 0 : currentAnswer,
+                    hint: row.hint
+                });
+            });
+        }
+
+        // 視圖切換機制
+        function toggleView(view) {
+            const homeView = document.getElementById('home-view');
+            const quizView = document.getElementById('quiz-view');
+            const resultView = document.getElementById('result-view');
+            
+            homeView.style.display = (view === 'home') ? 'block' : 'none';
+            quizView.style.display = (view === 'quiz') ? 'block' : 'none';
+            resultView.style.display = (view === 'result') ? 'block' : 'none';
+            
+            if (view === 'home') window.scrollTo(0, 0);
+        }
+
+        function confirmExit() {
+            if(confirm("確定要中途退出本次溫習嗎？進度將不會被保存。")) {
+                toggleView('home');
+            }
+        }
+
+        // 生成首頁主單元卡片
+        function renderHomePage() {
+            const grid = document.getElementById('unitGrid');
+            if (quizData.length === 0) {
+                grid.innerHTML = '<p class="empty-tips">目前沒有題目數據，請檢查 data.csv 檔案。</p>';
+                return;
+            }
+            grid.innerHTML = '';
+            
+            quizData.forEach((unit, uIdx) => {
+                const card = document.createElement('div');
+                card.className = 'unit-card';
+                const ul = document.createElement('ul');
+                ul.className = 'sub-unit-links';
+
+                unit.subUnits.forEach((sub, sIdx) => {
+                    const li = document.createElement('li');
+                    li.className = 'sub-unit-link-item';
+                    li.innerHTML = `<span>${sub.title}</span><i class="fa-solid fa-shuffle" style="color:#18bc9c; font-size:0.8rem;"></i>`;
+                    li.addEventListener('click', () => initQuizRoom(uIdx, sIdx));
+                    ul.appendChild(li);
+                });
+
+                card.innerHTML = `<div class="unit-card-header"><h3><i class="fa-solid fa-book-bookmark"></i> ${unit.mainUnit}</h3></div>`;
+                card.appendChild(ul);
+                grid.appendChild(card);
+            });
+        }
+
+        // 隨機洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // 從各主單元中「平均且隨機」抽取共 30 題的演算法
+        function initGlobalQuiz30() {
+            if (quizData.length === 0) return;
+
+            let selectedQuestions = [];
+            const targetTotal = 30; 
+
+            let unitPools = [];
+            quizData.forEach(unit => {
+                let unitQuestions = [];
+                unit.subUnits.forEach(sub => {
+                    unitQuestions = unitQuestions.concat(sub.questions);
+                });
+                if (unitQuestions.length > 0) {
+                    unitPools.push(shuffle([...unitQuestions]));
+                }
+            });
+
+            let totalAvailable = unitPools.reduce((sum, pool) => sum + pool.length, 0);
+            if (totalAvailable <= targetTotal) {
+                unitPools.forEach(pool => { selectedQuestions = selectedQuestions.concat(pool); });
+            } else {
+                let hasQuestionsLeft = true;
+                while (selectedQuestions.length < targetTotal && hasQuestionsLeft) {
+                    let addedInThisRound = false;
+                    for (let i = 0; i < unitPools.length; i++) {
+                        if (selectedQuestions.length >= targetTotal) break;
+                        if (unitPools[i].length > 0) {
+                            selectedQuestions.push(unitPools[i].shift()); 
+                            addedInThisRound = true;
+                        }
+                    }
+                    if (!addedInThisRound) {
+                        hasQuestionsLeft = false;
+                    }
+                }
+            }
+
+            currentQuestionsList = shuffle([...selectedQuestions]);
+            currentQIndex = 0;
+            correctCount = 0;
+            
+            document.getElementById('subTopicTitle').innerHTML = `<i class="fa-solid fa-bolt-lightning" style="color:#e67e22"></i> 全單元精選 30 題模擬試卷`;
+            toggleView('quiz');
+            renderSingleQuestion();
+        }
+
+        // 初始化指定課題測驗
+        function initQuizRoom(uIdx, sIdx) {
+            const originalQuestions = quizData[uIdx].subUnits[sIdx].questions;
+            
+            currentQuestionsList = shuffle([...originalQuestions]);
+            currentQIndex = 0;
+            correctCount = 0; 
+            
+            document.getElementById('subTopicTitle').innerText = quizData[uIdx].subUnits[sIdx].title;
+            toggleView('quiz');
+            renderSingleQuestion();
+        }
+
+        // 渲染單道問題
+        function renderSingleQuestion() {
+            const qData = currentQuestionsList[currentQIndex];
+            
+            document.getElementById('progressText').innerText = `第 ${currentQIndex + 1} / ${currentQuestionsList.length} 題`;
+            document.getElementById('qText').innerText = qData.q;
+            
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            const nextBtn = document.getElementById('nextBtn');
+            feedbackContainer.classList.remove('show');
+            nextBtn.style.display = 'none';
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            optionsContainer.classList.remove('answered');
+
+            const optionLetters = ['A', 'B', 'C', 'D'];
+            const correctLetter = optionLetters[qData.answer];
+
+            qData.options.forEach((optText, oIdx) => {
+                const li = document.createElement('li');
+                li.className = 'option-item';
+                li.innerText = optText;
+                
+                li.addEventListener('click', function() {
+                    if (optionsContainer.classList.contains('answered')) return;
+                    optionsContainer.classList.add('answered');
+                    
+                    const isCorrect = (oIdx === qData.answer);
+
+                    if (isCorrect) {
+                        li.classList.add('correct');
+                        correctCount++; 
+
+                        feedbackContainer.style.backgroundColor = '#d4edda';
+                        feedbackContainer.style.borderColor = '#28a745';
+                        feedbackContainer.style.color = '#155724';
+                        feedbackContainer.innerHTML = `
+                            <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 5px;">
+                                <i class="fa-solid fa-circle-check" style="color: #28a745;"></i> 回答正確！
+                            </div>
+                            <div><strong>重點概念解析：</strong>${qData.hint || '暫無額外解析。'}</div>
+                        `;
+                    } else {
+                        li.classList.add('wrong');
+                        if(optionsContainer.children[qData.answer]) {
+                            optionsContainer.children[qData.answer].classList.add('correct');
+                        }
+
+                        feedbackContainer.style.backgroundColor = '#fff3cd';
+                        feedbackContainer.style.borderColor = '#ffc107';
+                        feedbackContainer.style.color = '#856404';
+                        feedbackContainer.innerHTML = `
+                            <div style="font-size: 1.05rem; font-weight: bold; margin-bottom: 5px; color: #dc3545;">
+                                <i class="fa-solid fa-circle-xmark"></i> 答錯了！正確答案是 (${correctLetter})
+                            </div>
+                            <div><strong>正確答案解析：</strong>${qData.hint || '暫無額外解析。'}</div>
+                        `;
+                    }
+                    
+                    feedbackContainer.classList.add('show');
+                    
+                    nextBtn.style.display = 'block';
+                    if (currentQIndex === currentQuestionsList.length - 1) {
+                        nextBtn.innerHTML = `查看結算成績單 <i class="fa-solid fa-square-poll-vertical"></i>`;
+                    } else {
+                        nextBtn.innerHTML = `下一題 <i class="fa-solid fa-arrow-right"></i>`;
+                    }
+                });
+                optionsContainer.appendChild(li);
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQIndex < currentQuestionsList.length - 1) {
+                currentQIndex++;
+                renderSingleQuestion();
+            } else {
+                showResultsSummary();
+            }
+        }
+
+        // 計算分數與五星評級結算系統
+        function showResultsSummary() {
+            const total = currentQuestionsList.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            
+            document.getElementById('resultPercentage').innerText = `${percentage}%`;
+            document.getElementById('resultScoreText').innerText = `答對 ${correctCount} 題 / 共 ${total} 題`;
+            
+            let grade = "";
+            let comment = "";
+            
+            if (percentage === 100) {
+                grade = "評級：⭐⭐⭐⭐⭐ 頂尖卓越！";
+                comment = "無懈可擊！你完美掌握了所有重點概念，核心理論滾瓜爛熟。保持這個狀態，你在測考中絕對能摘星奪冠！";
+            } else if (percentage >= 85) {
+                grade = "評級：⭐⭐⭐⭐⭐ 表現優異！";
+                comment = "非常出色！你的 HMSC 基本功相當扎實，答題精準度高。再稍微注意長題目情境中的字眼分析，就能完美衝刺最高層級！";
+            } else if (percentage >= 70) {
+                grade = "評級：✨✨✨✨ 穩中求勝";
+                comment = "很好！你對大部分的單元知識都有正確理解。建議針對剛才答錯的題目仔細對照詳解，把盲點補齊就能成功升級！";
+            } else if (percentage >= 50) {
+                grade = "評級：👍👍👍 穩步前進";
+                comment = "合格了！你有對不同概念有一定印象，但部分細節和相似理論容易混淆。多翻閱課本和筆記，多刷幾次全單元挑戰，分數一定會再往上衝！";
+            } else {
+                grade = "評級：🔥繼續努力・打好根基🔥";
+                comment = "這次答題有些吃力喔！別灰心，HMSC 的範疇較廣，建議先按個別課題逐一擊破，看清楚解析中的關鍵字，再回來挑戰大會考！加油！";
+            }
+            
+            document.getElementById('evalGrade').innerText = grade;
+            document.getElementById('evalComment').innerText = comment;
+            
+            toggleView('result');
+        }
+    </script>
+</body>
+</html>
